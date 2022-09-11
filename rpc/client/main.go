@@ -6,7 +6,7 @@ import (
 	"log"
 	"time"
 
-	go_rpc "github.com/Deadcoder11u2/go-chat/proto"
+  proto "github.com/Deadcoder11u2/go-chat/proto"
 	"google.golang.org/grpc"
 )
 
@@ -20,15 +20,11 @@ func main() {
   ctx, cancel := context.WithTimeout(context.Background(), time.Second)
   defer cancel()
 
-  client := go_rpc.NewAddServiceClient(conn)
+  client := proto.NewJobServiceClient(conn)
 
-  a := int64(19)
-  b := int64(20)
+  req := &proto.JobRequest{FileContent: "print(\"Hello World\")", FileName: "main.py", CronCommand: "*/1 * * * *"}
 
-  req := &go_rpc.Request{A: a, B: b}
-
-
-  res, err := client.Multiply(ctx, req)
+  res, err := client.ScheduleJob(ctx, req)
   fmt.Println(res)
   defer conn.Close()
 }
