@@ -36,7 +36,7 @@ func main() {
 	reflection.Register(srv)
 
 	if e := srv.Serve(listener); e != nil {
-		panic(e)
+		panic(err)
 	}
 
 }
@@ -49,6 +49,18 @@ func CreateFile(filename string) (*os.File) {
 	}
 
 	return file
+}
+
+func RunJob(request *proto.JobRequest) {
+		cmd := exec.Command("python", request.GetFileName())
+		stdout, err := cmd.Output()
+
+		if err != nil {
+			fmt.Println("Error while executing the code")
+			return
+		}
+
+		fmt.Println("Output of cron job: " + string(stdout))
 }
 
 func (s *server) ScheduleJob(ctx context.Context, request *proto.JobRequest) (*proto.JobResponse, error) {
@@ -64,17 +76,7 @@ func (s *server) ScheduleJob(ctx context.Context, request *proto.JobRequest) (*p
 	file.Close()
 
 	jobRes := proto.JobResponse{Body: "Cron Job scheduled successfully"}
-	scheduler.Cron(request.GetCronCommand()).Do(func() {
-		cmd := exec.Command("python", request.GetFileName())
-		stdout, err := cmd.Output()
-
-		if err != nil {
-			fmt.Sprintln("Error while executing the code")
-			return
-		}
-
-		fmt.Sprintln("Output of cron job: " + string(stdout))
-	})
+	scheduler.Cron(request.GetCronCommand()).Do(RunJob, request)
 
 	scheduler.StartAsync()
 
