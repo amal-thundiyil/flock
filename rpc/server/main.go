@@ -1,47 +1,51 @@
-package server
+package main
 
 import (
 	"context"
-	"log"
+	"fmt"
 	"net"
 
-	"github.com/Deadcoder11u2/go-chat/proto"
+	proto "github.com/Deadcoder11u2/go-chat/proto"
+
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
 
-type server struct {
+type server struct{
+	proto.UnimplementedAddServiceServer
 }
 
 func main() {
-	listner, err := net.Listen("tcp", ":4040")
-
+	listener, err := net.Listen("tcp", ":4040")
 	if err != nil {
-		log.Printf("Error while starting the server on port 4040 %v", err)
+		panic(err)
 	}
 
 	srv := grpc.NewServer()
-	go_rpc.RegisterAddServiceServer(srv, &server{})
+	proto.RegisterAddServiceServer(srv, &server{})
 	reflection.Register(srv)
 
-	if e := srv.Serve(listner); e != nil {
-		log.Printf("Error occured while serving in the port 4040 %v", e)
+	if e := srv.Serve(listener); e != nil {
+		panic(e)
 	}
+
 }
 
-func (s *server) Add(ctx context.Context,request *go_rpc.Request) (*go_rpc.Response, error) {
+func (s *server) Add(ctx context.Context, request *proto.Request) (*proto.Response, error) {
 	a, b := request.GetA(), request.GetB()
 
 	result := a + b
 
-	return &go_rpc.Response{Result: result}, nil
+	return &proto.Response{Result: result}, nil
 }
 
-
-func (s *server) Multiply(ctx context.Context,request *go_rpc.Request) (*go_rpc.Response, error) {
+func (s *server) Multiply(ctx context.Context, request *proto.Request) (*proto.Response, error) {
+	fmt.Println("Hello from the multiplication")
 	a, b := request.GetA(), request.GetB()
 
 	result := a * b
 
-	return &go_rpc.Response{Result: result}, nil
+	fmt.Println(result)
+
+	return &proto.Response{Result: result}, nil
 }
