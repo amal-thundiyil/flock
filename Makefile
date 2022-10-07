@@ -2,8 +2,7 @@
 #  Installation
 #
 
-.PHONY: install install-dev
-.PHONY: clean rebuild chmod pip-compile docker-clean
+.PHONY: install install-dev clean rebuild chmod pip-compile docker-clean
 install:
 	@ ./scripts/install/install.sh prod
 
