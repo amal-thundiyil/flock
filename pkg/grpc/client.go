@@ -6,11 +6,11 @@ import (
 	"log"
 	"time"
 
-	"mod/pkg/proto"
+	"github.com/amal-thundiyil/flock/pkg/proto"
 	"google.golang.org/grpc"
 )
 
-func clientConnect() {
+func ClientConnect() {
 
 	conn, err := grpc.Dial("localhost:4040", grpc.WithInsecure())
 	if err != nil {
@@ -22,7 +22,7 @@ func clientConnect() {
 
 	client := proto.NewJobServiceClient(conn)
 
-	req := &proto.JobRequest{FileContent: "print(\"Hello World\")", FileName: "main.py", CronCommand: "*/1 * * * *"}
+	req := &proto.JobRequest{FileBody: "print(\"Hello World\")", Name: "main.py", CronSchedule: "*/1 * * * *", Executor: proto.JobRequest_PYTHON}
 
 	res, err := client.ScheduleJob(ctx, req)
 	fmt.Println(res)

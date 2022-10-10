@@ -9,7 +9,7 @@ import (
 	exec "os/exec"
 	"time"
 
-	"mod/pkg/proto"
+	"github.com/amal-thundiyil/flock/pkg/proto"
 
 	"github.com/go-co-op/gocron"
 	"google.golang.org/grpc"
@@ -22,8 +22,10 @@ type server struct {
 
 var scheduler gocron.Scheduler
 
-func grpcServer() {
+func StartGrpcServer() {
 	scheduler = *gocron.NewScheduler(time.UTC)
+
+	fmt.Println("GRPC server listening on port 4040")
 
 	listener, err := net.Listen("tcp", ":4040")
 	if err != nil {
@@ -51,7 +53,7 @@ func CreateFile(filename string) *os.File {
 }
 
 func RunJob(request *proto.JobRequest) {
-	cmd := exec.Command("python", request.GetFileName())
+	cmd := exec.Command(request.GetExecutor().String(), request.Name)
 	stdout, err := cmd.Output()
 
 	if err != nil {
@@ -64,18 +66,18 @@ func RunJob(request *proto.JobRequest) {
 
 func (s *server) ScheduleJob(ctx context.Context, request *proto.JobRequest) (*proto.JobResponse, error) {
 	fmt.Println("Cron Job Details")
-	fmt.Printf("Filecontent: %s\n", request.GetFileContent())
-	fmt.Printf("Filename: %s\n", request.GetFileName())
-	fmt.Printf("CronCommand: %s\n", request.GetCronCommand())
+	fmt.Printf("Filecontent: %s\n", request.GetFileBody())
+	fmt.Printf("Filename: %s\n", request.GetName())
+	fmt.Printf("CronCommand: %s\n", request.GetCronSchedule())
 
-	file := CreateFile(request.GetFileName())
+	file := CreateFile(request.GetName())
 
-	file.WriteString(request.GetFileContent())
+	file.WriteString(request.GetFileBody())
 
 	file.Close()
 
 	jobRes := proto.JobResponse{Body: "Cron Job scheduled successfully"}
-	scheduler.Cron(request.GetCronCommand()).Do(RunJob, request)
+	scheduler.Cron(request.GetCronSchedule()).Do(RunJob, request)
 
 	scheduler.StartAsync()
 

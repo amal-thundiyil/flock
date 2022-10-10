@@ -19,6 +19,7 @@ message JobRequest {
     string command = 1;
   }
   ExecutorConfig config = 4;
+  string file_body = 5;
 }
 
 

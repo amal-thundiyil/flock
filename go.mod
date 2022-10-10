@@ -1,6 +1,6 @@
-module mod
+module github.com/amal-thundiyil/flock
 
-go 1.19
+go 1.18
 
 require (
 	github.com/go-co-op/gocron v1.17.0

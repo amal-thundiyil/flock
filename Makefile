@@ -34,7 +34,7 @@ docker-clean:
 #
 #  Development
 #
-.PHONY: dev-start dev-stop dev monitor-frontend monitor-backend monitor frontend-start backend-stop backend-start backend-restart backend clean rebuild test proto-compile
+.PHONY: dev-start dev-stop dev monitor-frontend monitor-backend monitor frontend-start backend-stop backend-start backend-restart backend clean rebuild test proto-compile grpc-server
 
 backend-start:
 	@ scripts/control/start_backend.sh
@@ -60,3 +60,6 @@ test:
 
 proto-compile:
 	@ cd proto && protoc --go_out=. --go-grpc_out=. service.proto
+
+grpc-server:
+	@ go run main.go
