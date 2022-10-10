@@ -1,4 +1,4 @@
-package main
+package grpc
 
 import (
 	"context"
@@ -6,24 +6,23 @@ import (
 	"log"
 	"net"
 	"os"
-	"time"
 	exec "os/exec"
+	"time"
 
-	proto "github.com/Deadcoder11u2/go-chat/proto"
+	"mod/pkg/proto"
 
 	"github.com/go-co-op/gocron"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
 
-type server struct{
+type server struct {
 	proto.UnimplementedJobServiceServer
 }
 
-
 var scheduler gocron.Scheduler
 
-func main() {
+func grpcServer() {
 	scheduler = *gocron.NewScheduler(time.UTC)
 
 	listener, err := net.Listen("tcp", ":4040")
@@ -41,7 +40,7 @@ func main() {
 
 }
 
-func CreateFile(filename string) (*os.File) {
+func CreateFile(filename string) *os.File {
 	file, err := os.Create(filename)
 
 	if err != nil {
@@ -52,15 +51,15 @@ func CreateFile(filename string) (*os.File) {
 }
 
 func RunJob(request *proto.JobRequest) {
-		cmd := exec.Command("python", request.GetFileName())
-		stdout, err := cmd.Output()
+	cmd := exec.Command("python", request.GetFileName())
+	stdout, err := cmd.Output()
 
-		if err != nil {
-			fmt.Println("Error while executing the code")
-			return
-		}
+	if err != nil {
+		fmt.Println("Error while executing the code")
+		return
+	}
 
-		fmt.Println("Output of cron job: " + string(stdout))
+	fmt.Println("Output of cron job: " + string(stdout))
 }
 
 func (s *server) ScheduleJob(ctx context.Context, request *proto.JobRequest) (*proto.JobResponse, error) {

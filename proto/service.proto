@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package proto;
+
+
+option go_package="../pkg/proto";
+
+message JobRequest {
+  string name = 1;
+  string cron_schedule = 2;
+  enum Executor {
+    SHELL = 0;
+    PYTHON = 1;
+    JAVA = 2;
+    CPP = 3;
+  }
+  Executor executor = 3;
+  message ExecutorConfig {
+    string command = 1;
+  }
+  ExecutorConfig config = 4;
+}
+
+
+message JobResponse {
+  string body = 1;
+}
+
+service JobService {
+  rpc ScheduleJob(JobRequest) returns (JobResponse);
+}
