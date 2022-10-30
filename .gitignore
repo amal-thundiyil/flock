@@ -4,6 +4,8 @@
 *.dll
 *.so
 *.dylib
+client.go
+main.py
 
 # Test binary, built with `go test -c`
 *.test
