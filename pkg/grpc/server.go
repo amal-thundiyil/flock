@@ -53,11 +53,13 @@ func CreateFile(filename string) *os.File {
 }
 
 func RunJob(request *proto.JobRequest) {
-	cmd := exec.Command(request.GetExecutor().String(), request.Name)
+	fmt.Println(request.Config.GetCommand())
+	cmd := exec.Command(request.Config.GetCommand())
 	stdout, err := cmd.Output()
 
 	if err != nil {
 		fmt.Println("Error while executing the code")
+		fmt.Println(err)
 		return
 	}
 
