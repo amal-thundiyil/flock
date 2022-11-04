@@ -54,7 +54,7 @@ func CreateFile(filename string) *os.File {
 
 func RunJob(request *proto.JobRequest) {
 	fmt.Println(request.Config.GetCommand())
-	cmd := exec.Command(request.Config.GetCommand())
+	cmd := exec.Command("python3", "Main.py")
 	stdout, err := cmd.Output()
 
 	if err != nil {

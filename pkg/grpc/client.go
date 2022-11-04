@@ -22,7 +22,7 @@ func ClientConnect() {
 
 	client := proto.NewJobServiceClient(conn)
 
-	req := &proto.JobRequest{FileBody: "for i in range(10):\n\tprint(i, end = \",\")\nprint(\"Done\")", Name: "Main.py", CronSchedule: "*/1 * * * *", Executor: proto.JobRequest_PYTHON, Config: &proto.JobRequest_ExecutorConfig{Command: "python Main.py"}}
+	req := &proto.JobRequest{FileBody: "for i in range(10):\n\tprint(i, end = \",\")\nprint(\"Done\")", Name: "Main.py", CronSchedule: "*/1 * * * *", Executor: proto.JobRequest_PYTHON, Config: &proto.JobRequest_ExecutorConfig{Command: "python3 Main.py"}}
 
 	res, err := client.ScheduleJob(ctx, req)
 	fmt.Println(res)
