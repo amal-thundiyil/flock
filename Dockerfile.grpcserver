@@ -6,7 +6,6 @@ COPY ./server.sh ./start.sh
 COPY ./web.sh ./web.sh
 RUN cd app && ls -al && \
     apt update && \
-    go mod init github.com/amal-thundiyil/flock/pkg && \
     go mod tidy && \
     apt install -y supervisor
 

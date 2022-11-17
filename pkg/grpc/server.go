@@ -7,6 +7,7 @@ import (
 	"net"
 	"os"
 	exec "os/exec"
+	"strings"
 	"sync"
 	"time"
 
@@ -28,15 +29,17 @@ var scheduler gocron.Scheduler
 
 var m sync.Mutex
 var wg sync.WaitGroup
+var server_port string
 
-func StartGrpcServer() {
-
-	// wg.Add(100)
-
+func StartGrpcServer(port string) {
 	wg.Add(1)
+	server_port = port
+
+	scheduler = *gocron.NewScheduler(time.UTC)
+
 	fmt.Println("GRPC server listening on port 4040")
 
-	listener, err := net.Listen("tcp", ":4040")
+	listener, err := net.Listen("tcp", port)
 	if err != nil {
 		panic(err)
 	}
@@ -63,7 +66,8 @@ func CreateFile(filename string) *os.File {
 
 func RunJob(request *proto.JobRequest) {
 	fmt.Println(request.Config.GetCommand())
-	cmd := exec.Command("python3", "/root/Main.py")
+	arr := strings.Split(request.Config.GetCommand(), " ")
+	cmd := exec.Command(arr[0], arr[1:]...)
 	stdout, err := cmd.Output()
 
 	if err != nil {
@@ -72,6 +76,7 @@ func RunJob(request *proto.JobRequest) {
 		return
 	}
 
+	fmt.Println("From port :" + server_port)
 	fmt.Println("===================Output Of Cron Job===================")
 	fmt.Println("Output of cron job: " + string(stdout))
 	fmt.Println("===================End Of Job Output===================\n\n")
@@ -87,12 +92,6 @@ func (s *server) ScheduleJob(ctx context.Context, request *proto.JobRequest) (*p
 		fmt.Printf("Filename: %s\n", request.GetName())
 		fmt.Printf("CronCommand: %s\n", request.GetCronSchedule())
 		fmt.Println("======================End Of Job Details======================\n\n")
-
-		file := CreateFile("/root/" + request.GetName())
-
-		file.WriteString(request.GetFileBody())
-
-		file.Close()
 
 		scheduler.Cron(request.GetCronSchedule()).Do(RunJob, request)
 

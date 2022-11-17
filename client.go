@@ -5,5 +5,5 @@ import (
 )
 
 func main() {
-  grpc.ClientConnect()
+	grpc.ClientConnect("4040", "echo Hello World")
 }

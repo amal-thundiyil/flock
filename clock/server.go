@@ -1,0 +1,5 @@
+package clock
+
+func Server() {
+
+}

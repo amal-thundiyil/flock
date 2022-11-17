@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package proto;
+
+option go_package=".";
+
+message JobRequest {
+ repeated int32 data = 1;
+}
+
+message JobResponse {
+  repeated int32 res = 1;
+}
+
+service JobService {
+  rpc Synchronize(JobRequest) returns (JobResponse);
+}

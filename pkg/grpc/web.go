@@ -17,7 +17,9 @@ func WebServer() {
 	})
 
 	http.HandleFunc("/cron", func(w http.ResponseWriter, r *http.Request) {
-		ClientConnect()
+		command := r.URL.Query().Get("command")
+		ClientConnect("4040", command)
+		ClientConnect("4041", command)
 		fmt.Fprintf(w, "Job Scheduled")
 	})
 	
