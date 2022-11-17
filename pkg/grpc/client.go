@@ -11,7 +11,6 @@ import (
 )
 
 func ClientConnect() {
-
 	conn, err := grpc.Dial("localhost:4040", grpc.WithInsecure())
 	if err != nil {
 		log.Fatal("Error while connecting to the server")
@@ -25,6 +24,6 @@ func ClientConnect() {
 	req := &proto.JobRequest{FileBody: "for i in range(10):\n\tprint(i, end = \",\")\nprint(\"Done\")", Name: "Main.py", CronSchedule: "*/1 * * * *", Executor: proto.JobRequest_PYTHON, Config: &proto.JobRequest_ExecutorConfig{Command: "python3 Main.py"}}
 
 	res, err := client.ScheduleJob(ctx, req)
-	fmt.Println(res)
+	fmt.Println(res.GetBody())
 	defer conn.Close()
 }

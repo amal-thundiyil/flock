@@ -1,8 +1,42 @@
 version: "3"
 
 services:
-  consul:
-    image: consul
-    container_name: consul-master
-    ports:
-      - 8500:8500
+  nginx:
+    image: deadcoder11u2/flock-nginx
+    container_name: nginx
+    build:
+      context: "./Dockerfile.nginx"
+    ports: 
+      - "80:80"
+    environment:
+      "SERVER_1": "99.0.0.8:8081"
+      "SERVER_2": "99.0.0.9:8081"
+    depends_on:
+      - flock_grpc_2
+    networks:
+      flock:
+        ipv4_address: 99.0.0.7
+  flock_grpc_1:
+    image: deadcoder11u2/flock-grpc
+    container_name: grpc_1
+    networks:
+      flock:
+        ipv4_address: 99.0.0.8
+  
+  flock_grpc_2:
+    image: deadcoder11u2/flock-grpc
+    container_name: grpc_2
+    networks:
+      flock:
+        ipv4_address: 99.0.0.9
+    depends_on:
+      - flock_grpc_1
+
+
+
+networks:
+  flock:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 99.0.0.0/16

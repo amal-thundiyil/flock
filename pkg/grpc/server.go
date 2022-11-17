@@ -7,7 +7,6 @@ import (
 	"net"
 	"os"
 	exec "os/exec"
-	"time"
 
 	"github.com/amal-thundiyil/flock/pkg/proto"
 
@@ -20,10 +19,14 @@ type server struct {
 	proto.UnimplementedJobServiceServer
 }
 
+// var m sync.Mutex
+// var wg sync.WaitGroup
+
 var scheduler gocron.Scheduler
 
 func StartGrpcServer() {
-	scheduler = *gocron.NewScheduler(time.UTC)
+
+	// wg.Add(100)
 
 	fmt.Println("GRPC server listening on port 4040")
 
@@ -67,6 +70,30 @@ func RunJob(request *proto.JobRequest) {
 }
 
 func (s *server) ScheduleJob(ctx context.Context, request *proto.JobRequest) (*proto.JobResponse, error) {
+	// m.Lock()
+	ScheduleMutex := func(request *proto.JobRequest)  {
+		fmt.Println("Cron Job Details")
+		fmt.Printf("Filecontent: %s\n", request.GetFileBody())
+		fmt.Printf("Filename: %s\n", request.GetName())
+		fmt.Printf("CronCommand: %s\n", request.GetCronSchedule())
+
+		file := CreateFile(request.GetName())
+
+		file.WriteString(request.GetFileBody())
+
+		file.Close()
+
+		scheduler.Cron(request.GetCronSchedule()).Do(RunJob, request)
+
+		scheduler.StartAsync()
+		time.Sleep(6 * time.Second)
+	}
+	ScheduleMutex(request)
+	// m.Unlock()
+	// wg.Wait()
+	fmt.Println(proto.JobResponse{Body: "Hello"})
+	// return &proto.JobResponse{Body: "Job Scheduled"}, nil
+
 	fmt.Println("Cron Job Details")
 	fmt.Printf("Filecontent: %s\n", request.GetFileBody())
 	fmt.Printf("Filename: %s\n", request.GetName())
