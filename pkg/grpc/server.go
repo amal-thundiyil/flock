@@ -59,7 +59,7 @@ func CreateFile(filename string) *os.File {
 
 func RunJob(request *proto.JobRequest) {
 	fmt.Println(request.Config.GetCommand())
-	cmd := exec.Command("python3", "main.py")
+	cmd := exec.Command("python3", "/root/Main.py")
 	stdout, err := cmd.Output()
 
 	if err != nil {
@@ -85,7 +85,7 @@ func (s *server) ScheduleJob(ctx context.Context, request *proto.JobRequest) (*p
 		fmt.Printf("CronCommand: %s\n", request.GetCronSchedule())
 		fmt.Println("======================End Of Job Details======================\n\n")
 
-		file := CreateFile(request.GetName())
+		file := CreateFile("/root/" + request.GetName())
 
 		file.WriteString(request.GetFileBody())
 
