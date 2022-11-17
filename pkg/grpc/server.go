@@ -7,6 +7,8 @@ import (
 	"net"
 	"os"
 	exec "os/exec"
+	"sync"
+	"time"
 
 	"github.com/amal-thundiyil/flock/pkg/proto"
 
@@ -24,10 +26,14 @@ type server struct {
 
 var scheduler gocron.Scheduler
 
+var m sync.Mutex
+var wg sync.WaitGroup
+
 func StartGrpcServer() {
 
 	// wg.Add(100)
 
+	wg.Add(1)
 	fmt.Println("GRPC server listening on port 4040")
 
 	listener, err := net.Listen("tcp", ":4040")
@@ -66,16 +72,21 @@ func RunJob(request *proto.JobRequest) {
 		return
 	}
 
+	fmt.Println("===================Output Of Cron Job===================")
 	fmt.Println("Output of cron job: " + string(stdout))
+	fmt.Println("===================End Of Job Output===================\n\n")
 }
 
 func (s *server) ScheduleJob(ctx context.Context, request *proto.JobRequest) (*proto.JobResponse, error) {
-	// m.Lock()
-	ScheduleMutex := func(request *proto.JobRequest)  {
+	m.Lock()
+	ScheduleMutex := func(request *proto.JobRequest) {
+		fmt.Println("Curent Time: ", time.Now())
+		fmt.Println("======================Scheduling Cron Job======================")
 		fmt.Println("Cron Job Details")
 		fmt.Printf("Filecontent: %s\n", request.GetFileBody())
 		fmt.Printf("Filename: %s\n", request.GetName())
 		fmt.Printf("CronCommand: %s\n", request.GetCronSchedule())
+		fmt.Println("======================End Of Job Details======================\n\n")
 
 		file := CreateFile(request.GetName())
 
@@ -87,28 +98,10 @@ func (s *server) ScheduleJob(ctx context.Context, request *proto.JobRequest) (*p
 
 		scheduler.StartAsync()
 		time.Sleep(6 * time.Second)
+		m.Unlock()
 	}
-	ScheduleMutex(request)
-	// m.Unlock()
-	// wg.Wait()
-	fmt.Println(proto.JobResponse{Body: "Hello"})
-	// return &proto.JobResponse{Body: "Job Scheduled"}, nil
+	go ScheduleMutex(request)
+	wg.Wait()
 
-	fmt.Println("Cron Job Details")
-	fmt.Printf("Filecontent: %s\n", request.GetFileBody())
-	fmt.Printf("Filename: %s\n", request.GetName())
-	fmt.Printf("CronCommand: %s\n", request.GetCronSchedule())
-
-	file := CreateFile(request.GetName())
-
-	file.WriteString(request.GetFileBody())
-
-	file.Close()
-
-	jobRes := proto.JobResponse{Body: "Cron Job scheduled successfully"}
-	scheduler.Cron(request.GetCronSchedule()).Do(RunJob, request)
-
-	scheduler.StartAsync()
-
-	return &jobRes, nil
+	return &proto.JobResponse{Body: "Job Scheduled"}, nil
 }
