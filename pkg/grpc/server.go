@@ -21,13 +21,17 @@ type server struct {
 	proto.UnimplementedJobServiceServer
 }
 
+// var m sync.Mutex
+// var wg sync.WaitGroup
+
 var scheduler gocron.Scheduler
 
 var m sync.Mutex
 var wg sync.WaitGroup
 
 func StartGrpcServer() {
-	scheduler = *gocron.NewScheduler(time.UTC)
+
+	// wg.Add(100)
 
 	wg.Add(1)
 	fmt.Println("GRPC server listening on port 4040")
@@ -74,7 +78,6 @@ func RunJob(request *proto.JobRequest) {
 }
 
 func (s *server) ScheduleJob(ctx context.Context, request *proto.JobRequest) (*proto.JobResponse, error) {
-
 	m.Lock()
 	ScheduleMutex := func(request *proto.JobRequest) {
 		fmt.Println("Curent Time: ", time.Now())
